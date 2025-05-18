@@ -340,6 +340,7 @@
 
     /* Modal styles */
     .modal {
+        overflow-y: auto;
         display: none;
         position: fixed;
         z-index: 1000;
