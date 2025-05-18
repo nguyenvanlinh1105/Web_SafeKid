@@ -6,7 +6,7 @@
     <title>Vì An Toàn Của Trẻ Em</title>
     <!-- Add Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script> -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Add Google Maps API -->
@@ -313,7 +313,7 @@
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
+        // const auth = firebase.auth();
         const database = firebase.database();
 
         // DOM elements
@@ -387,86 +387,76 @@
             }
         });
 
-        // Logout functionality
-        logoutBtn.addEventListener('click', () => {
-            auth.signOut().then(() => {
-                window.location.href = 'login.html';
-            }).catch(error => {
-                console.error('Logout error:', error);
-                alert('Đăng xuất không thành công. Vui lòng thử lại.');
-            });
-        });
-
+       
         // Form submission for creating/updating user
-        userForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const userId = userIdField.value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            const fullName = document.getElementById('full-name').value;
-            const phone = document.getElementById('phone').value;
-            const birthdate = document.getElementById('birthdate').value;
-            const gender = document.getElementById('gender').value;
-            const role = document.getElementById('role').value;
-            const address = document.getElementById('address-input').value;
-            const status = document.getElementById('status').value;
-            const approved = document.getElementById('approved').value === 'true';
+      submitBtn.addEventListener('click', async (e) => {
+        // e.preventDefault();
 
-            // For new user, validate password
-            if (!userId && password !== confirmPassword) {
-                alert('Mật khẩu không khớp!');
-                return;
+        const userId = userIdField.value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const fullName = document.getElementById('full-name').value;
+        const phone = document.getElementById('phone').value;
+        const birthdate = document.getElementById('birthdate').value;
+        const gender = document.getElementById('gender').value;
+        const role = document.getElementById('role').value;
+        const address = document.getElementById('address-input').value;
+        const status = document.getElementById('status').value;
+        const approved = document.getElementById('approved').value === 'true';
+
+        // Validate password nếu là tạo mới
+        if (!userId && password !== confirmPassword) {
+            alert('Mật khẩu không khớp!');
+            return;
+        }
+
+        try {
+            const userData = {
+                fullName,
+                email,
+                phone,
+                birthdate,
+                gender,
+                role,
+                address,
+                status,
+                approved,
+                updatedAt: Date.now()
+            };
+
+            if(role==null){
+                alert("role =null");
+                role = admin;
             }
-
-            try {
-                const userData = {
-                    fullName,
-                    email,
-                    phone,
-                    birthdate,
-                    gender,
-                    role,
-                    address,
-                    status,
-                    approved,
-                    updatedAt: Date.now()
-                };
-
-                if (userId) {
-                    // Update existing user
-                    await database.ref('users/' + userId).update(userData);
-                    alert('Cập nhật tài khoản thành công!');
-                } else {
-                    // Create new user
-                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                    const newUserId = userCredential.user.uid;
-                    
-                    // Add additional user data to Realtime Database
-                    userData.createdAt = Date.now();
-                    userData.status = 'active';
-                    userData.approved = role === 'admin'; // Auto-approve admins
-                    
-                    await database.ref('users/' + newUserId).set(userData);
-                    alert('Tạo tài khoản thành công!');
-                }
-
+            if (userId) {
+                await database.ref('users/' + userId).update(userData);
                 userModal.style.display = 'none';
-                userForm.reset();
+                alert("Cập nhật thông tin người dùng thành công");
+            } else {
+              try {
+                const newUserRef = database.ref('users').push();
+                const newUserId = newUserRef.key;
 
-                // Reload user list based on current tab
-                const activeTab = document.querySelector('.search-tab.active').getAttribute('data-tab');
-                if (activeTab === 'admin-management') {
-                    loadAdminUsers();
-                } else if (activeTab === 'staff-management') {
-                    loadStaffUsers();
+                userData.createdAt = Date.now();
+                userData.status = 'active';
+                userData.approved = role === 'admin'; 
+
+                
+                userModal.style.display = 'none';
+                alert('Tạo tài khoản thành công!');
+                await newUserRef.set(userData);
+               
+                } catch (error) {
+                    console.error('Lỗi tạo tài khoản:', error);
+                    alert('Tạo tài khoản thất bại!');
                 }
-            } catch (error) {
-                console.error('Error saving user:', error);
-                alert('Lỗi: ' + error.message);
             }
-        });
+        } catch (error) {
+            console.error('Lỗi khi lưu user:', error);
+            alert('Lỗi: ' + error.message);
+        }
+    });
 
         //  Reset data app 
         resetdataBtn.addEventListener('click', async()=>{
@@ -637,7 +627,7 @@
                                 loadStaffUsers();
                             }
                         } catch (error) {
-                            console.error('Error approving staff:', error);
+                            console.error('Error approving staff:', error);   
                             alert('Phê duyệt không thành công: ' + error.message);
                         }
                     }
@@ -683,8 +673,8 @@
                     const userId = e.target.getAttribute('data-id');
                     if (confirm('Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác.')) {
                         try {
-                            // Delete from Authentication
-                            await auth.currentUser.delete();
+                            // // Delete from Authentication
+                            // await auth.currentUser.delete();
                             
                             // Delete from Realtime Database
                             await database.ref('users/' + userId).remove();
@@ -905,8 +895,6 @@
             alert('Chức năng tìm kiếm sẽ được triển khai sau');
         });
 
-        // load data 
-        loadData();
     </script>
     <script>
         // loadAdminUsers();
