@@ -393,3 +393,132 @@
     .form-col {
         flex: 1;
     }
+
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+    .health-data {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 70%;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .search-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .search-tab {
+        margin-bottom: 5px;
+    }
+    
+    .search-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .search-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .results-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .modal-content {
+        width: 85%;
+        margin: 10% auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .search-fields {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-tab {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .btn {
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+    
+    .health-card {
+        padding: 15px;
+    }
+    
+    #map-container {
+        height: 300px;
+    }
+    
+    .pagination {
+        flex-wrap: wrap;
+    }
+    
+    .page-item {
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .results-table th:nth-child(5),
+    .results-table td:nth-child(5),
+    .results-table th:nth-child(6),
+    .results-table td:nth-child(6) {
+        display: none;
+    }
+    
+    h1 {
+        font-size: 24px;
+    }
+    
+    .search-title {
+        font-size: 16px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 3px;
+    }
+    
+    .action-buttons .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+}
