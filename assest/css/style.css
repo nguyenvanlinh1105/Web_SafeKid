@@ -720,6 +720,30 @@
 }
 
 /* Very small devices (e.g., iPhone 5/SE) */
+@media (max-width: 400px) {
+     .health-card{
+        width: 300px;
+    }
+    .search-tab {
+        padding: 8px 4px;
+        font-size: 11px;
+    }
+    
+    .results-table {
+        font-size: 10px;
+    }
+    
+    .health-card h3 {
+        font-size: 12px;
+    }
+    
+    .btn {
+        padding: 4px;
+        font-size: 10px;
+    }
+}
+
+/* Very small devices (e.g., iPhone 5/SE) */
 @media (max-width: 320px) {
      .health-card{
         width: 300px;
