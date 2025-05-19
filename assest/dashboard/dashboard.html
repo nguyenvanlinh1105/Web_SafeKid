@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vì An Toàn Của Trẻ Em</title>
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Add Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCEt8H-NBPnssJLWEkhpSPHYb1vYH_A4is&libraries=visualization"></script>
+    <link rel="stylesheet" href="/assest/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hệ thống quản lý thông tin app</h1>
+            <div class="search-actions">
+                <button id="logout-btn" class="btn btn-secondary">Đăng xuất</button>
+                <button id="create-user-btn" class="btn btn-primary">+ Tạo tài khoản</button>
+            </div>
+        </header>
+
+        <div class="search-tabs">
+            <div class="search-tab " data-tab="admin-management">Quản lí Admin</div>
+            <div class="search-tab" data-tab="staff-management">Quản lí Nhân viên</div>
+            <div class="search-tab active" data-tab="app-data">Thông tin dữ liệu</div>
+        </div>
+
+        <!-- Admin Management -->
+        <div class="search-container hidden" id="admin-management">
+            <div class="search-header">
+                <div class="search-title">Danh sách Quản trị viên</div>
+                <div class="search-actions">
+                    <button class="btn btn-secondary" id="refresh-admin">Làm mới</button>
+                    <button class="btn btn-primary" id="search-admin">Tìm kiếm</button>
+                </div>
+            </div>
+
+            <div class="search-fields">
+                <div class="form-group">
+                    <label for="admin-name">Tên quản trị viên</label>
+                    <input type="text" id="admin-name" placeholder="Nhập tên...">
+                </div>
+
+                <div class="form-group">
+                    <label for="admin-email">Email</label>
+                    <input type="text" id="admin-email" placeholder="Nhập email...">
+                </div>
+
+                <div class="form-group">
+                    <label for="admin-status">Trạng thái</label>
+                    <select id="admin-status">
+                        <option value="">Tất cả</option>
+                        <option value="active">Hoạt động</option>
+                        <option value="inactive">Không hoạt động</option>
+                    </select>
+                </div>
+            </div>
+
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Ngày sinh</th>
+                        <th>Giới tính</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-table-body">
+                    <!-- Admin data will be loaded here -->
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <div class="page-item active">1</div>
+                <div class="page-item">2</div>
+                <div class="page-item">3</div>
+                <div class="page-item">...</div>
+                <div class="page-item">10</div>
+            </div>
+        </div>
+
+        <!-- Staff Management -->
+        <div class="search-container hidden" id="staff-management">
+            <div class="search-header">
+                <div class="search-title">Danh sách Nhân viên</div>
+                <div class="search-actions">
+                    <button class="btn btn-secondary" id="refresh-staff">Làm mới</button>
+                    <button class="btn btn-primary" id="search-staff">Tìm kiếm</button>
+                </div>
+            </div>
+
+            <div class="search-fields">
+                <div class="form-group">
+                    <label for="staff-name">Tên nhân viên</label>
+                    <input type="text" id="staff-name" placeholder="Nhập tên...">
+                </div>
+
+                <div class="form-group">
+                    <label for="staff-email">Email</label>
+                    <input type="text" id="staff-email" placeholder="Nhập email...">
+                </div>
+
+                <div class="form-group">
+                    <label for="staff-status">Trạng thái</label>
+                    <select id="staff-status">
+                        <option value="">Tất cả</option>
+                        <option value="pending">Chờ phê duyệt</option>
+                        <option value="active">Đã phê duyệt</option>
+                        <option value="inactive">Không hoạt động</option>
+                    </select>
+                </div>
+            </div>
+
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Ngày sinh</th>
+                        <th>Giới tính</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="staff-table-body">
+                    <!-- Staff data will be loaded here -->
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <div class="page-item active">1</div>
+                <div class="page-item">2</div>
+                <div class="page-item">3</div>
+                <div class="page-item">...</div>
+                <div class="page-item">10</div>
+            </div>
+        </div>
+
+        <!-- App Data -->
+        <div class="search-container " id="app-data">
+            <div class="search-header">
+                <div class="search-title">Thông tin dữ liệu theo dõi từ thiết bị</div>
+                <button id="reset-data-btn" class="btn" style="background-color: aqua;  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">Reset thông tin</button>
+            </div>
+
+            <div class="health-data">
+                <div class="health-card">
+                    <h3>Thông tin nhịp tim</h3>
+                    <div>
+                        <p>Nhịp tim hiện tại: <span id="heart-rate" class="heart-rate-value">--</span> bpm</p>
+                        <p>Tình trạng: <span id="heart-status">Không có dữ liệu</span></p>
+                        <canvas id="heart-rate-chart" height="200"></canvas>
+                    </div>
+                    
+                </div>
+
+                <div class="health-card">
+                    <h3>Thông tin vị trí</h3>
+                    <div>
+                        <p>Vĩ độ: <span id="latitude">--</span></p>
+                        <p>Kinh độ: <span id="longitude">--</span></p>
+                        <p>Thời gian dừng lại: <span id="location-time">--</span></p>
+                        <p>Trạng thái quên trẻ: <span id="forgot-status">--</span></p>
+                        <p>Địa chỉ: <span id="address">Đang tải...</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="map-container">
+                <h3>Bản đồ vị trí</h3>
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit User Modal -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Tạo tài khoản mới</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form id="user-form">
+                <input type="hidden" id="user-id">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="full-name">Họ và tên *</label>
+                            <input type="text" id="full-name" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" required>
+                        </div>
+                    </div>
+                </div>
+
+               <div class="form-row" id="password-fields">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="password">Mật khẩu *</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" required>
+                            <span class="toggle-password" data-target="password">👁️</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="confirm-password">Xác nhận mật khẩu *</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="confirm-password" required>
+                            <span class="toggle-password" data-target="confirm-password">👁️</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="phone">Số điện thoại</label>
+                            <input type="tel" id="phone">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="birthdate">Ngày sinh</label>
+                            <input type="date" id="birthdate">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="gender">Giới tính</label>
+                            <select id="gender">
+                                <option value="">Chọn giới tính</option>
+                                <option value="male">Nam</option>
+                                <option value="female">Nữ</option>
+                                <option value="other">Khác</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="role">Vai trò *</label>
+                            <select id="role" required>
+                                <option value="">Chọn vai trò</option>
+                                <option value="admin">Quản trị viên</option>
+                                <option value="staff">Nhân viên</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address-input">Địa chỉ</label>
+                    <input type="text" id="address-input">
+                </div>
+
+                <div id="status-fields" class="form-row" style="display: none;">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="status">Trạng thái</label>
+                            <select id="status">
+                                <option value="active">Hoạt động</option>
+                                <option value="inactive">Không hoạt động</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="approved">Phê duyệt</label>
+                            <select id="approved">
+                                <option value="true">Đã phê duyệt</option>
+                                <option value="false">Chờ phê duyệt</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="search-actions" style="justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary close-modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Tạo tài khoản</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Chart.js for heart rate visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAMimu-AKBo-ISvXCS4wORyCfyHVwFi8D0",
+            authDomain: "labln-fd4bb.firebaseapp.com",
+            databaseURL: "https://labln-fd4bb-default-rtdb.firebaseio.com",
+            projectId: "labln-fd4bb",
+            storageBucket: "labln-fd4bb.appspot.com",
+            messagingSenderId: "181646000819",
+            appId: "1:181646000819:web:d97cbfb2a1b4e3dac066c6",
+            measurementId: "G-V2ZG8EX96K"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // DOM elements
+        const tabs = document.querySelectorAll('.search-tab');
+        const containers = document.querySelectorAll('.search-container');
+        const logoutBtn = document.getElementById('logout-btn');
+        const createUserBtn = document.getElementById('create-user-btn');
+        const resetdataBtn = document.getElementById('reset-data-btn')
+        const userModal = document.getElementById('user-modal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const userForm = document.getElementById('user-form');
+        const modalTitle = document.getElementById('modal-title');
+        const submitBtn = document.getElementById('submit-btn');
+        const passwordFields = document.getElementById('password-fields');
+        const statusFields = document.getElementById('status-fields');
+        const userIdField = document.getElementById('user-id');
+
+        // Biến toàn cục cho biểu đồ nhịp tim
+        let heartRateChart = null;
+        let map = null;
+        let marker = null;
+
+        // Tab switching functionality
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                tab.classList.add('active');
+
+                // Hide all search containers
+                containers.forEach(container => {
+                    container.classList.add('hidden');
+                });
+
+                // Show the selected search container
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.remove('hidden');
+                // Load data based on tab
+                if (tabId === 'admin-management') {
+                    loadAdminUsers();
+                } else if (tabId === 'staff-management') {
+                    loadStaffUsers();
+                } else if (tabId === 'app-data') {
+                    loadAppData();
+                }
+            });
+        });
+
+        // Modal functionality
+        createUserBtn.addEventListener('click', () => {
+            // Reset form and show password fields for new user
+            userForm.reset();
+            modalTitle.textContent = 'Tạo tài khoản mới';
+            submitBtn.textContent = 'Tạo tài khoản';
+            passwordFields.style.display = 'flex';
+            statusFields.style.display = 'none';
+            userIdField.value = '';
+            userModal.style.display = 'block';
+        });
+
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                userModal.style.display = 'none';
+            });
+        });
+
+        // window.addEventListener('click', (e) => {
+        //     if (e.target === userModal) {
+        //         userModal.style.display = 'none';
+        //     }
+        // });
+
+        logoutBtn.addEventListener('click',()=>{
+             window.location.href = '/index.html';
+        })
+       
+        // Form submission for creating/updating user
+      userForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const userId = userIdField.value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const fullName = document.getElementById('full-name').value;
+        const phone = document.getElementById('phone').value;
+        const birthdate = document.getElementById('birthdate').value;
+        const gender = document.getElementById('gender').value;
+        const role = document.getElementById('role').value;
+        const address = document.getElementById('address-input').value;
+        const status = document.getElementById('status').value;
+        const approved = document.getElementById('approved').value === 'true';
+
+        // Validate password nếu là tạo mới
+        if (password !== confirmPassword) {
+            alert('Mật khẩu không khớp!');
+            return;
+        }
+
+        try {
+            const userData = {
+                fullName,
+                email,
+                phone,
+                birthdate,
+                gender,
+                role,
+                address,
+                status,
+                approved,
+                updatedAt: Date.now()
+            };
+
+            if(role==null){
+                alert("role =null");
+                role = admin;
+            }
+            if (userId) {
+                await database.ref('users/' + userId).update(userData);
+                userModal.style.display = 'none';
+                alert("Cập nhật thông tin người dùng thành công");
+            } else {
+              try {
+                const newUserRef = database.ref('users').push();
+                const newUserId = newUserRef.key;
+                userData.password = password
+
+                userData.createdAt = Date.now();
+                userData.status = 'active';
+                userData.approved = role === 'admin'; 
+
+                
+                userModal.style.display = 'none';
+                alert('Tạo tài khoản thành công!');
+                await newUserRef.set(userData);
+               
+                } catch (error) {
+                    console.error('Lỗi tạo tài khoản:', error);
+                    alert('Tạo tài khoản thất bại!');
+                }
+            }
+
+            const activeTab = document.querySelector('.search-tab.active').getAttribute('data-tab');
+            if (activeTab === 'admin-management') {
+                loadAdminUsers();
+            } else if (activeTab === 'staff-management') {
+                loadStaffUsers();
+            }
+        } catch (error) {
+            console.error('Lỗi khi lưu user:', error);
+            alert('Lỗi: ' + error.message);
+        }
+    });
+    //  xem mật khẩu
+    document.addEventListener("DOMContentLoaded", function() {
+        const toggleButtons = document.querySelectorAll(".toggle-password");
+        
+        toggleButtons.forEach(button => {
+            button.addEventListener("click", function() {
+                const targetId = this.getAttribute("data-target");
+                const input = document.getElementById(targetId);
+                const type = input.getAttribute("type") === "password" ? "text" : "password";
+                input.setAttribute("type", type);
+                // Optionally toggle the icon (e.g., 👁️ to 👁️‍🗨️ for hide), but using the same emoji for simplicity
+            });
+        });
+    });
+
+        //  Reset data app 
+        resetdataBtn.addEventListener('click', async()=>{
+            await database.ref('NhipTim/').set(85);
+            await database.ref('forgot_status/').set(0);
+            alert('Reset thông tin thành công!');
+        })
+
+        // Load admin users
+        async function loadAdminUsers() {
+            const adminTableBody = document.getElementById('admin-table-body');
+            adminTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Đang tải dữ liệu...</td></tr>';
+
+            try {
+                const snapshot = await database.ref('users').orderByChild('role').equalTo('admin').once('value');
+                const users = snapshot.val();
+
+                adminTableBody.innerHTML = '';
+
+                if (!users) {
+                    adminTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Không có dữ liệu</td></tr>';
+                    return;
+                }
+
+                let count = 1;
+                Object.keys(users).forEach(userId => {
+                    const user = users[userId];
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${count++}</td>
+                        <td>${user.fullName || '--'}</td>
+                        <td>${user.email}</td>
+                        <td>${user.phone || '--'}</td>
+                        <td>${user.birthdate ? new Date(user.birthdate).toLocaleDateString() : '--'}</td>
+                        <td>${getGenderText(user.gender)}</td>
+                        <td><span class="status ${user.status === 'active' ? 'status-active' : 'status-inactive'}">${user.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}</span></td>
+                        <td class="action-buttons">
+                            <button class="btn btn-edit" data-id="${userId}">Sửa</button>
+                            <button class="btn ${user.status === 'active' ? 'btn-lock' : 'btn-approve'}" data-id="${userId}">${user.status === 'active' ? 'Khóa' : 'Mở'}</button>
+                            <button class="btn btn-delete" data-id="${userId}">Xóa</button>
+                        </td>
+                    `;
+                    
+                    adminTableBody.appendChild(row);
+                });
+
+                // Add event listeners for buttons
+                addUserActionListeners();
+            } catch (error) {
+                console.error('Error loading admin users:', error);
+                adminTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Lỗi khi tải dữ liệu</td></tr>';
+            }
+        }
+
+        // Load staff users
+        async function loadStaffUsers() {
+            const staffTableBody = document.getElementById('staff-table-body');
+            staffTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Đang tải dữ liệu...</td></tr>';
+
+            try {
+                const snapshot = await database.ref('users').orderByChild('role').equalTo('staff').once('value');
+                const users = snapshot.val();
+
+                staffTableBody.innerHTML = '';
+
+                if (!users) {
+                    staffTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Không có dữ liệu</td></tr>';
+                    return;
+                }
+
+                let count = 1;
+                Object.keys(users).forEach(userId => {
+                    const user = users[userId];
+                    const row = document.createElement('tr');
+                    
+                    let statusClass = 'status-pending';
+                    let statusText = 'Chờ phê duyệt';
+                    
+                    if (user.approved) {
+                        statusClass = user.status === 'active' ? 'status-active' : 'status-inactive';
+                        statusText = user.status === 'active' ? 'Hoạt động' : 'Không hoạt động';
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${count++}</td>
+                        <td>${user.fullName || '--'}</td>
+                        <td>${user.email}</td>
+                        <td>${user.phone || '--'}</td>
+                        <td>${user.birthdate ? new Date(user.birthdate).toLocaleDateString() : '--'}</td>
+                        <td>${getGenderText(user.gender)}</td>
+                        <td><span class="status ${statusClass}">${statusText}</span></td>
+                        <td class="action-buttons">
+                            ${!user.approved ? `<button class="btn btn-approve" data-id="${userId}">Phê duyệt</button>` : ''}
+                            <button class="btn btn-edit" data-id="${userId}">Sửa</button>
+                            <button class="btn ${user.status === 'active' ? 'btn-lock' : 'btn-approve'}" data-id="${userId}">${user.status === 'active' ? 'Khóa' : 'Mở'}</button>
+                            <button class="btn btn-delete" data-id="${userId}">Xóa</button>
+                        </td>
+                    `;
+                    
+                    staffTableBody.appendChild(row);
+                });
+
+                // Add event listeners for buttons
+                addUserActionListeners();
+            } catch (error) {
+                console.error('Error loading staff users:', error);
+                staffTableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Lỗi khi tải dữ liệu</td></tr>';
+            }
+        }
+
+        // Add event listeners for user action buttons
+        function addUserActionListeners() {
+            // Edit buttons
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const userId = e.target.getAttribute('data-id');
+                    try {
+                        const snapshot = await database.ref('users/' + userId).once('value');
+                        const user = snapshot.val();
+                        
+                        if (user) {
+                            // Fill the form with user data
+                            document.getElementById('full-name').value = user.fullName || '';
+                            document.getElementById('email').value = user.email || '';
+                            document.getElementById('phone').value = user.phone || '';
+                            document.getElementById('birthdate').value = user.birthdate || '';
+                            document.getElementById('gender').value = user.gender || '';
+                            document.getElementById('password').value = user.password||'';
+                            document.getElementById('confirm-password').value = user.password||'';
+                            document.getElementById('role').value = user.role || '';
+                            document.getElementById('address-input').value = user.address || '';
+                            document.getElementById('status').value = user.status || 'active';
+                            document.getElementById('approved').value = user.approved ? 'true' : 'false';
+                            
+                            // Update modal for editing
+                            modalTitle.textContent = 'Chỉnh sửa tài khoản';
+                            submitBtn.textContent = 'Cập nhật';
+                            // passwordFields.style.display = 'none';
+                          
+                            statusFields.style.display = 'flex';
+                            userIdField.value = userId;
+                            
+                            userModal.style.display = 'block';
+                        }
+                    } catch (error) {
+                        console.error('Error loading user data:', error);
+                        alert('Không thể tải dữ liệu người dùng');
+                    }
+                });
+            });
+
+            // Approve buttons
+            document.querySelectorAll('.btn-approve').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const userId = e.target.getAttribute('data-id');
+                    if (confirm('Bạn có chắc chắn muốn phê duyệt nhân viên này?')) {
+                        try {
+                            await database.ref('users/' + userId).update({
+                                approved: true,
+                                status: 'active',
+                                updatedAt: Date.now()
+                            });
+                            alert('Phê duyệt nhân viên thành công!');
+                            
+                            // Reload the appropriate list
+                            const activeTab = document.querySelector('.search-tab.active').getAttribute('data-tab');
+                            if (activeTab === 'admin-management') {
+                                loadAdminUsers();
+                            } else if (activeTab === 'staff-management') {
+                                loadStaffUsers();
+                            }
+                        } catch (error) {
+                            console.error('Error approving staff:', error);   
+                            alert('Phê duyệt không thành công: ' + error.message);
+                        }
+                    }
+                });
+            });
+
+            // Lock/Unlock buttons
+            document.querySelectorAll('.btn-lock, .btn-approve:not(.btn-approve[data-id])').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    if (e.target.classList.contains('btn-approve') && e.target.textContent === 'Phê duyệt') return;
+                    
+                    const userId = e.target.getAttribute('data-id');
+                    const currentStatus = e.target.classList.contains('btn-lock') ? 'active' : 'inactive';
+                    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+                    const action = currentStatus === 'active' ? 'khóa' : 'mở';
+                    
+                    if (confirm(`Bạn có chắc chắn muốn ${action} tài khoản này?`)) {
+                        try {
+                            await database.ref('users/' + userId).update({
+                                status: newStatus,
+                                updatedAt: Date.now()
+                            });
+                            alert(`${action === 'khóa' ? 'Khóa' : 'Mở'} tài khoản thành công!`);
+                            
+                            // Reload the appropriate list
+                            const activeTab = document.querySelector('.search-tab.active').getAttribute('data-tab');
+                            if (activeTab === 'admin-management') {
+                                loadAdminUsers();
+                            } else if (activeTab === 'staff-management') {
+                                loadStaffUsers();
+                            }
+                        } catch (error) {
+                            console.error(`Error ${action} user:`, error);
+                            alert(`${action === 'khóa' ? 'Khóa' : 'Mở'} tài khoản không thành công: ${error.message}`);
+                        }
+                    }
+                });
+            });
+
+            // Delete buttons
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const userId = e.target.getAttribute('data-id');
+                    if (confirm('Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác.')) {
+                        try {
+                            // // Delete from Authentication
+                            // await auth.currentUser.delete();
+                            
+                            // Delete from Realtime Database
+                            await database.ref('users/' + userId).remove();
+                            
+                            alert('Xóa tài khoản thành công!');
+                            
+                            // Reload the appropriate list
+                            const activeTab = document.querySelector('.search-tab.active').getAttribute('data-tab');
+                            if (activeTab === 'admin-management') {
+                                loadAdminUsers();
+                            } else if (activeTab === 'staff-management') {
+                                loadStaffUsers();
+                            }
+                        } catch (error) {
+                            console.error('Error deleting user:', error);
+                            alert('Xóa tài khoản không thành công: ' + error.message);
+                        }
+                    }
+                });
+            });
+        }
+
+        // Helper function to get gender text
+        function getGenderText(gender) {
+            switch (gender) {
+                case 'male': return 'Nam';
+                case 'female': return 'Nữ';
+                case 'other': return 'Khác';
+                default: return '--';
+            }
+        }
+
+        // Load app data (heart rate and location)
+        function loadAppData() {
+            // Load heart rate data
+            database.ref('NhipTim').on('value', (snapshot) => {
+                const heartRate = snapshot.val();
+                if (heartRate) {
+                    document.getElementById('heart-rate').textContent = heartRate;
+                    
+                    const heartStatus = document.getElementById('heart-status');
+                    if (heartRate < 60) {
+                        heartStatus.textContent = 'Nhịp tim thấp';
+                        heartStatus.style.color = 'var(--warning-color)';
+                    } else if (heartRate > 100) {
+                        heartStatus.textContent = 'Nhịp tim cao';
+                        heartStatus.style.color = 'var(--danger-color)';
+                    } else {
+                        heartStatus.textContent = 'Bình thường';
+                        heartStatus.style.color = 'var(--success-color)';
+                    }
+                    
+                    // Update chart if it exists
+                    if (heartRateChart) {
+                        updateHeartRateChart(heartRate);
+                    }
+                }
+            });
+
+            // Load location data
+            database.ref('ToaDo').on('value', (snapshot) => {
+                const locationData = snapshot.val();
+                if (locationData) {
+                    const lat = locationData.lat;
+                    const lng = locationData.long;
+                    const timestamp = locationData.timestamp;
+                    const forgotStatus = locationData.forgot_status;
+                    //  chuyển đổi time 
+                    const now = Date.now(); // thời gian hiện tại (mili giây)
+
+                    // Tính khoảng thời gian dừng (mili giây)
+                    const diffMs = now - timestamp;
+
+                    // Chuyển khoảng thời gian sang đơn vị dễ hiểu (ví dụ: giây, phút, giờ)
+                    const diffSeconds = Math.floor(diffMs / 1000);
+                    const diffMinutes = Math.floor(diffSeconds / 60);
+                    const diffHours = Math.floor(diffMinutes / 60); 
+
+                    document.getElementById('latitude').textContent = lat;
+                    document.getElementById('longitude').textContent = lng;
+                   document.getElementById('location-time').textContent = `${diffHours} giờ, ${diffMinutes % 60} phút, ${diffSeconds % 60} giây`;
+                    document.getElementById('forgot-status').textContent = forgotStatus === 1 ? 'Phát hiện bỏ quên trẻ trên xe' : 'Bình thường - Hệ thống an toàn';
+                    document.getElementById('forgot-status').style.color = forgotStatus === 1 ? 'var(--danger-color)' : 'var(--success-color)';
+                    
+                    // Update map
+                    updateMap(lat, lng);
+                    
+                    // Reverse geocode to get address (simplified for demo)
+                    getAddressFromLatLng(lat, lng);
+                }
+            });
+
+            // Initialize heart rate chart
+            initHeartRateChart();
+        }
+
+        // Initialize heart rate chart
+        function initHeartRateChart() {
+            const ctx = document.getElementById('heart-rate-chart').getContext('2d');
+            
+            // Create initial empty chart
+            heartRateChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Nhịp tim (bpm)',
+                        data: [],
+                        borderColor: 'var(--danger-color)',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            suggestedMin: 50,
+                            suggestedMax: 120
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update heart rate chart with new data
+        function updateHeartRateChart(newRate) {
+            // Get current data
+            const labels = heartRateChart.data.labels;
+            const data = heartRateChart.data.datasets[0].data;
+            
+            // Add new data point
+            const now = new Date();
+            const timeString = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            labels.push(timeString);
+            data.push(newRate);
+            
+            // Keep only the last 20 data points
+            if (labels.length > 20) {
+                labels.shift();
+                data.shift();
+            }
+            
+            // Update chart
+            heartRateChart.update();
+        }
+
+        // Initialize map
+        function initMap(lat = 16.077688, lng = 108.2139) {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat, lng },
+                zoom: 15,
+                mapTypeId: 'roadmap'
+            });
+            
+            marker = new google.maps.Marker({
+                position: { lat, lng },
+                map: map,
+                title: 'Vị trí hiện tại'
+            });
+        }
+
+        // Update map with new location
+        function updateMap(lat, lng) {
+            if (!map) {
+                initMap(lat, lng);
+                return;
+            }
+            
+            const newPos = new google.maps.LatLng(lat, lng);
+            map.setCenter(newPos);
+            
+            if (marker) {
+                marker.setPosition(newPos);
+            } else {
+                marker = new google.maps.Marker({
+                    position: newPos,
+                    map: map,
+                    title: 'Vị trí hiện tại'
+                });
+            }
+        }
+
+       function getAddressFromLatLng(lat, lng) {
+            const apiKey = 'ea03da5c24284ccb85670fb976d6b4e5'; // Thay bằng API key thật của bạn
+            const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${apiKey}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.results && data.results.length > 0) {
+                        const address = data.results[0].formatted;
+                        document.getElementById('address').textContent = address;
+                    } else {
+                        document.getElementById('address').textContent = 'Không tìm thấy địa chỉ';
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi gọi API OpenCage:', error);
+                    document.getElementById('address').textContent = 'Lỗi lấy địa chỉ';
+                });
+        }
+
+
+        // Refresh buttons
+        document.getElementById('refresh-admin').addEventListener('click', loadAdminUsers);
+        document.getElementById('refresh-staff').addEventListener('click', loadStaffUsers);
+
+        // Search buttons (simplified for demo)
+        document.getElementById('search-admin').addEventListener('click', () => {
+            alert('Chức năng tìm kiếm sẽ được triển khai sau');
+        });
+
+        document.getElementById('search-staff').addEventListener('click', () => {
+            alert('Chức năng tìm kiếm sẽ được triển khai sau');
+        });
+
+    </script>
+    <script>
+        // loadAdminUsers();
+        loadAppData();
+    </script>
+</body>
+</html>
