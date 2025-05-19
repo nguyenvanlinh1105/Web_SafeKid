@@ -722,24 +722,24 @@
 /* Very small devices (e.g., iPhone 5/SE) */
 @media (max-width: 320px) {
      .health-card{
-            width: 300px;
+        width: 300px;
     }
     .search-tab {
-        padding: 8px 12px;
-        font-size: 12px;
+        padding: 8px 4px;
+        font-size: 11px;
     }
     
     .results-table {
-        font-size: 12px;
+        font-size: 10px;
     }
     
     .health-card h3 {
-        font-size: 14px;
+        font-size: 12px;
     }
     
     .btn {
-        padding: 8px;
-        font-size: 12px;
+        padding: 4px;
+        font-size: 10px;
     }
 }
 
