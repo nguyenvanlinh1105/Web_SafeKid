@@ -451,6 +451,11 @@
             alert('Mật khẩu không khớp!');
             return;
         }
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            alert('Email không hợp lệ!');
+            return;
+        }
 
         try {
             // Check if email already exists (except for the current user if updating)
