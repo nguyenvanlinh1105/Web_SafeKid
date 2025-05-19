@@ -430,7 +430,7 @@
         })
        
         // Form submission for creating/updating user
-      userForm.addEventListener('submit', async (e) => {
+     userForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const userId = userIdField.value;
@@ -453,6 +453,24 @@
         }
 
         try {
+            // Check if email already exists (except for the current user if updating)
+            const snapshot = await database.ref('users').once('value');
+            const users = snapshot.val();
+
+            if (users) {
+                let emailExists = false;
+                Object.keys(users).forEach((key) => {
+                    if (users[key].email === email && key !== userId) {
+                        emailExists = true;
+                    }
+                });
+
+                if (emailExists) {
+                    alert('Tài khoản với email này đã tồn tại!');
+                    return;
+                }
+            }
+
             const userData = {
                 fullName,
                 email,
@@ -466,29 +484,27 @@
                 updatedAt: Date.now()
             };
 
-            if(role==null){
-                alert("role =null");
-                role = admin;
+            if (!role) {
+                alert("Vui lòng chọn vai trò (role)!");
+                return;
             }
+
             if (userId) {
                 await database.ref('users/' + userId).update(userData);
                 userModal.style.display = 'none';
                 alert("Cập nhật thông tin người dùng thành công");
             } else {
-              try {
-                const newUserRef = database.ref('users').push();
-                const newUserId = newUserRef.key;
-                userData.password = password
+                try {
+                    const newUserRef = database.ref('users').push();
+                    const newUserId = newUserRef.key;
+                    userData.password = password;
+                    userData.createdAt = Date.now();
+                    userData.status = 'active';
+                    userData.approved = role === 'admin';
 
-                userData.createdAt = Date.now();
-                userData.status = 'active';
-                userData.approved = role === 'admin'; 
-
-                
-                userModal.style.display = 'none';
-                alert('Tạo tài khoản thành công!');
-                await newUserRef.set(userData);
-               
+                    await newUserRef.set(userData);
+                    userModal.style.display = 'none';
+                    alert('Tạo tài khoản thành công!');
                 } catch (error) {
                     console.error('Lỗi tạo tài khoản:', error);
                     alert('Tạo tài khoản thất bại!');
@@ -506,6 +522,7 @@
             alert('Lỗi: ' + error.message);
         }
     });
+
     //  xem mật khẩu
     document.addEventListener("DOMContentLoaded", function() {
         const toggleButtons = document.querySelectorAll(".toggle-password");
@@ -525,7 +542,13 @@
         resetdataBtn.addEventListener('click', async()=>{
             await database.ref('NhipTim/').set(85);
             await database.ref('forgot_status/').set(0);
+            await database.ref('ToaDo/').set({
+                lat: 16.077688,           
+                long: 108.2139,          
+                timestamp: Date.now(), 
+            });
             alert('Reset thông tin thành công!');
+
         })
 
         // Load admin users
