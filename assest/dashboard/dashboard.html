@@ -13,10 +13,22 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCEt8H-NBPnssJLWEkhpSPHYb1vYH_A4is&libraries=visualization"></script>
     <link rel="stylesheet" href="/assest/css/style.css">
 </head>
+<style>
+    .logo {
+        margin-top: 7px;
+        width: 50px; /* Adjust size as needed */
+        height: 50px;
+        margin-right: 10px; /* Space between logo and text */
+        object-fit: contain; /* Ensure logo scales properly */
+    }
+</style>
 <body>
     <div class="container">
         <header>
-            <h1>Hệ thống quản lý thông tin app</h1>
+            <div class="search-actions"> 
+                <img src="/assest/img/bg_app.png" alt="Logo" class="logo">
+                <h1> Hệ thống quản lý thông tin app SafeKid</h1>
+            </div>
             <div class="search-actions">
                 <button id="logout-btn" class="btn btn-secondary" style="background-color: rgb(247, 76, 76); color:#ffff;">Đăng xuất</button>
                 <button id="create-user-btn" class="btn btn-primary">+ Tạo tài khoản</button>

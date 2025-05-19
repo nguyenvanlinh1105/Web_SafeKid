@@ -455,7 +455,7 @@
     
     .search-actions {
         width: 100%;
-        justify-content: flex-end;
+        justify-content: start;
     }
     
     .form-row {
@@ -740,6 +740,17 @@
     .btn {
         padding: 8px;
         font-size: 12px;
+    }
+    .logo {
+        margin-top: -7px;
+        width: 40px; /* Adjust size as needed */
+        height: 40px;
+        margin-right: 10px; /* Space between logo and text */
+        object-fit: contain; /* Ensure logo scales properly */
+    }
+    .search-actions h1{
+        margin-right: 10px;
+        font-size: 16px;
     }
 }
 
