@@ -8,6 +8,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Toastify -->
+    <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Add Google Maps API -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCEt8H-NBPnssJLWEkhpSPHYb1vYH_A4is&libraries=visualization"></script>
@@ -315,6 +321,7 @@
 
     <!-- Add Chart.js for heart rate visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     
     <script>
 
@@ -802,69 +809,140 @@
         }
 
         // Load app data (heart rate and location)
-        function loadAppData() {
-            // Load heart rate data
-            database.ref('NhipTim').on('value', (snapshot) => {
-                const heartRate = snapshot.val();
-                if (heartRate) {
-                    document.getElementById('heart-rate').textContent = heartRate;
+    function loadAppData() {
+        let lastAlertTime = 0; // Biến để theo dõi thời gian cảnh báo cuối cùng
+        const ALERT_COOLDOWN = 30000; // 30 giây giữa các cảnh báo
+
+        // Load heart rate data
+        database.ref('NhipTim').on('value', (snapshot) => {
+            const heartRate = snapshot.val();
+            if (heartRate) {
+                document.getElementById('heart-rate').textContent = heartRate;
+                
+                const heartStatus = document.getElementById('heart-status');
+                if (heartRate < 60) {
+                    heartStatus.textContent = 'Nhịp tim thấp';
+                    heartStatus.style.color = 'var(--warning-color)';
                     
-                    const heartStatus = document.getElementById('heart-status');
-                    if (heartRate < 60) {
-                        heartStatus.textContent = 'Nhịp tim thấp';
-                        heartStatus.style.color = 'var(--warning-color)';
-                    } else if (heartRate > 100) {
-                        heartStatus.textContent = 'Nhịp tim cao';
-                        heartStatus.style.color = 'var(--danger-color)';
-                    } else {
-                        heartStatus.textContent = 'Bình thường';
-                        heartStatus.style.color = 'var(--success-color)';
+                    // Hiển thị cảnh báo nếu đủ thời gian
+                    if (Date.now() - lastAlertTime > ALERT_COOLDOWN) {
+                        showDangerAlert('Cảnh báo nhịp tim thấp', `Nhịp tim hiện tại: ${heartRate} bpm (Dưới mức an toàn)`);
+                        lastAlertTime = Date.now();
                     }
+                } else if (heartRate > 100) {
+                    heartStatus.textContent = 'Nhịp tim cao';
+                    heartStatus.style.color = 'var(--danger-color)';
                     
-                    // Update chart if it exists
-                    if (heartRateChart) {
-                        updateHeartRateChart(heartRate);
+                    // Hiển thị cảnh báo nếu đủ thời gian
+                    if (Date.now() - lastAlertTime > ALERT_COOLDOWN) {
+                        showDangerAlert('Cảnh báo nhịp tim cao', `Nhịp tim hiện tại: ${heartRate} bpm (Trên mức an toàn)`);
+                        lastAlertTime = Date.now();
                     }
+                } else {
+                    heartStatus.textContent = 'Bình thường';
+                    heartStatus.style.color = 'var(--success-color)';
                 }
-            });
-
-            // Load location data
-            database.ref('ToaDo').on('value', (snapshot) => {
-                const locationData = snapshot.val();
-                if (locationData) {
-                    const lat = locationData.lat;
-                    const lng = locationData.long;
-                    const timestamp = locationData.timestamp;
-                    const forgotStatus = locationData.forgot_status;
-                    //  chuyển đổi time 
-                    const now = Date.now(); // thời gian hiện tại (mili giây)
-
-                    // Tính khoảng thời gian dừng (mili giây)
-                    const diffMs = now - timestamp;
-
-                    // Chuyển khoảng thời gian sang đơn vị dễ hiểu (ví dụ: giây, phút, giờ)
-                    const diffSeconds = Math.floor(diffMs / 1000);
-                    const diffMinutes = Math.floor(diffSeconds / 60);
-                    const diffHours = Math.floor(diffMinutes / 60); 
-
-                    document.getElementById('latitude').textContent = lat;
-                    document.getElementById('longitude').textContent = lng;
-                   document.getElementById('location-time').textContent = `${diffHours} giờ, ${diffMinutes % 60} phút, ${diffSeconds % 60} giây`;
-                    document.getElementById('forgot-status').textContent = forgotStatus === 1 ? 'Phát hiện bỏ quên trẻ trên xe' : 'Bình thường - Hệ thống an toàn';
-                    document.getElementById('forgot-status').style.color = forgotStatus === 1 ? 'var(--danger-color)' : 'var(--success-color)';
-                    
-                    // Update map
-                    updateMap(lat, lng);
-                    
-                    // Reverse geocode to get address (simplified for demo)
-                    getAddressFromLatLng(lat, lng);
+                
+                // Update chart if it exists
+                if (heartRateChart) {
+                    updateHeartRateChart(heartRate);
                 }
-            });
+            }
+        });
 
-            // Initialize heart rate chart
-            initHeartRateChart();
-        }
+        // Load location data
+        database.ref('ToaDo').on('value', (snapshot) => {
+            const locationData = snapshot.val();
+            if (locationData) {
+                const lat = locationData.lat;
+                const lng = locationData.long;
+                const timestamp = locationData.timestamp;
+                const forgotStatus = locationData.forgot_status;
+                
+                // Chuyển đổi thời gian
+                const now = Date.now();
+                const diffMs = now - timestamp;
+                const diffSeconds = Math.floor(diffMs / 1000);
+                const diffMinutes = Math.floor(diffSeconds / 60);
+                const diffHours = Math.floor(diffMinutes / 60);
 
+                document.getElementById('latitude').textContent = lat;
+                document.getElementById('longitude').textContent = lng;
+                document.getElementById('location-time').textContent = `${diffHours} giờ, ${diffMinutes % 60} phút, ${diffSeconds % 60} giây`;
+                
+                const forgotStatusElement = document.getElementById('forgot-status');
+                if (forgotStatus === 1) {
+                    forgotStatusElement.textContent = 'Phát hiện bỏ quên trẻ trên xe';
+                    forgotStatusElement.style.color = 'var(--danger-color)';
+                    
+                    // Hiển thị cảnh báo khẩn cấp nếu đủ thời gian
+                    if (Date.now() - lastAlertTime > ALERT_COOLDOWN) {
+                        showEmergencyAlert('KHẨN CẤP: TRẺ BỊ BỎ QUÊN TRÊN XE', 
+                            `Vị trí hiện tại: ${lat}, ${lng}. Thời gian dừng: ${diffHours} giờ ${diffMinutes % 60} phút`);
+                        lastAlertTime = Date.now();
+                    }
+                } else {
+                    forgotStatusElement.textContent = 'Bình thường - Hệ thống an toàn';
+                    forgotStatusElement.style.color = 'var(--success-color)';
+                }
+                
+                // Update map
+                updateMap(lat, lng);
+                
+                // Reverse geocode to get address
+                getAddressFromLatLng(lat, lng);
+            }
+        });
+
+        // Initialize heart rate chart
+        initHeartRateChart();
+    }
+
+    // Hàm hiển thị cảnh báo nguy hiểm
+    function showDangerAlert(title, message) {
+        // Hiển thị Toast nhỏ
+        Toastify({
+            text: `${title}: ${message}`,
+            duration: 10000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+            stopOnFocus: true
+        }).showToast();
+
+        // Hiển thị popup lớn
+        Swal.fire({
+            icon: 'warning',
+            title: title,
+            text: message,
+            confirmButtonText: 'Đã hiểu',
+            confirmButtonColor: '#3085d6'
+        });
+    }
+
+    // Hàm hiển thị cảnh báo khẩn cấp
+    function showEmergencyAlert(title, message) {
+        // Hiển thị Toast đỏ
+        Toastify({
+            text: `🚨 ${title}: ${message}`,
+            duration: 15000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "linear-gradient(to right, #ff416c, #ff4b2b)",
+            stopOnFocus: true
+        }).showToast();
+
+        // Hiển thị popup khẩn cấp
+        Swal.fire({
+            icon: 'error',
+            title: title,
+            html: `<div style="color:red; font-size:1.2em">${message}</div>`,
+            confirmButtonText: 'Xác nhận',
+            confirmButtonColor: '#d33',
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        });
+    }
         // Initialize heart rate chart
         function initHeartRateChart() {
             const ctx = document.getElementById('heart-rate-chart').getContext('2d');
